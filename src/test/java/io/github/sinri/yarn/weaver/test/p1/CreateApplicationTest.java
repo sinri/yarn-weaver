@@ -5,6 +5,8 @@ import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.v1.ResourceManager.cluste
 import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.v1.ResourceManager.cluster.apps.ClusterSubmitApplicationRequest;
 import io.vertx.core.Future;
 
+import java.util.Objects;
+
 public class CreateApplicationTest extends P1Test {
 
     public static void main(String[] args) {
@@ -16,11 +18,7 @@ public class CreateApplicationTest extends P1Test {
         return new ClusterNewApplicationRequest(YarnWeaver.yarnRMAddress())
                 .request()
                 .compose(meta -> {
-                    getLogger().info(eventLog -> eventLog
-                            .message("applied an application")
-                            .put("application_id", meta.applicationId())
-                            .put("meta.maximumResourceCapabilities", meta.maximumResourceCapabilities().toJsonObject())
-                    );
+                    getLogger().info("applied an application", Objects.requireNonNull(meta, "applied meta is null").toJsonObject());
 
                     return new ClusterSubmitApplicationRequest(YarnWeaver.yarnRMAddress())
                             .setEditor(form -> {
