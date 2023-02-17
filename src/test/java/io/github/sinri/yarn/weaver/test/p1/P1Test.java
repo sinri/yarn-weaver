@@ -2,6 +2,7 @@ package io.github.sinri.yarn.weaver.test.p1;
 
 import io.github.sinri.keel.facade.Keel;
 import io.github.sinri.keel.helper.KeelHelpers;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.event.center.KeelOutputEventLogCenter;
 import io.vertx.core.Future;
@@ -12,6 +13,28 @@ import java.util.Arrays;
 import java.util.Set;
 
 abstract public class P1Test {
+    private final KeelEventLogger logger;
+
+    public P1Test() {
+        logger = KeelOutputEventLogCenter.getInstance(KeelEventLog::render)
+                .createLogger(this.getClass().getSimpleName(), (eventLog) -> {
+                    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                    if (stackTrace.length <= 5) {
+                        eventLog.put("stack", null);
+                    } else {
+                        JsonArray array = new JsonArray();
+                        StackTraceElement[] slice = Arrays.copyOfRange(stackTrace, 5, stackTrace.length);
+                        KeelHelpers.jsonHelper().filterStackTrace(slice, mixedStackPrefixSet, (currentPrefix, ps) -> {
+                            array.add(currentPrefix + " × " + ps);
+                        }, (stackTraceElement) -> {
+                            array.add(stackTraceElement.toString());
+                        });
+                        eventLog.put("stack", array);
+                    }
+
+                });
+    }
+
     public static void init() {
         Keel.getConfiguration().loadPropertiesFile("config.properties");
         Keel.initializeVertxStandalone(new VertxOptions());
@@ -20,22 +43,7 @@ abstract public class P1Test {
     private static final Set<String> mixedStackPrefixSet = Set.of("io.vertx.", "java.", "io.netty.");
 
     protected KeelEventLogger getLogger() {
-        return KeelOutputEventLogCenter.getInstance().createLogger(this.getClass().getSimpleName(), (eventLog) -> {
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            if (stackTrace.length <= 5) {
-                eventLog.put("stack", null);
-            } else {
-                JsonArray array = new JsonArray();
-                StackTraceElement[] slice = Arrays.copyOfRange(stackTrace, 5, stackTrace.length);
-                KeelHelpers.jsonHelper().filterStackTrace(slice, mixedStackPrefixSet, (currentPrefix, ps) -> {
-                    array.add(currentPrefix + " × " + ps);
-                }, (stackTraceElement) -> {
-                    array.add(stackTraceElement.toString());
-                });
-                eventLog.put("stack", array);
-            }
-
-        });
+        return logger;
     }
 
     abstract protected Future<Void> run();
