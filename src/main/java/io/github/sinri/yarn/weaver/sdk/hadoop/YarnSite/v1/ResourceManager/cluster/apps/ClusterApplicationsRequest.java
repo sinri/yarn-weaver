@@ -24,7 +24,7 @@ import java.util.*;
  * All query parameters for this api will filter on all applications.
  * However the queue query parameter will only implicitly filter on unfinished applications that are currently in the given queue.
  */
-public class ClusterApplicationsRequest extends YarnSiteV1Request<ClusterApplication> {
+public class ClusterApplicationsRequest extends YarnSiteV1Request<ClusterApplicationsRequest.ClusterApplications> {
 
     /**
      * [deprecated] state of the application
@@ -235,7 +235,7 @@ public class ClusterApplicationsRequest extends YarnSiteV1Request<ClusterApplica
     }
 
     @Override
-    public Future<ClusterApplication> request() {
+    public Future<ClusterApplications> request() {
         Map<String, String> map = new HashMap<>();
         if (this.state != null) {
             map.put("state", state);
@@ -282,7 +282,7 @@ public class ClusterApplicationsRequest extends YarnSiteV1Request<ClusterApplica
         return this.requestWithGet(map)
                 .compose(jsonObject -> {
                     JsonObject apps = jsonObject.getJsonObject("apps");
-                    return Future.succeededFuture(new ClusterApplication(apps));
+                    return Future.succeededFuture(new ClusterApplications(apps));
                 });
     }
 

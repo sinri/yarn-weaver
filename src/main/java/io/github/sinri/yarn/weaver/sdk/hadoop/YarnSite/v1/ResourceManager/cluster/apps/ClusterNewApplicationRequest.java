@@ -7,7 +7,8 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 /**
- * With the New Application API, you can obtain an application-id which can then be used as part of the Cluster Submit Applications API to submit applications.
+ * With the New Application API, you can obtain an application-id
+ * which can then be used as part of the Cluster Submit Applications API to submit applications.
  * The response also includes the maximum resource capabilities available on the cluster.
  * NOTE: This feature is currently in the alpha stage and may change in the future.
  */
