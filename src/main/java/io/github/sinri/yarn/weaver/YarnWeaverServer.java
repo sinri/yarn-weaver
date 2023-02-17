@@ -2,6 +2,8 @@ package io.github.sinri.yarn.weaver;
 
 import io.github.sinri.keel.facade.Keel;
 import io.github.sinri.keel.web.http.KeelHttpServer;
+import io.github.sinri.keel.web.http.receptionist.KeelWebReceptionistKit;
+import io.github.sinri.yarn.weaver.receptionist.story.StoryReceptionist;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
@@ -22,6 +24,7 @@ public class YarnWeaverServer extends KeelHttpServer {
 
     @Override
     protected void configureRoutes(Router router) {
-
+        new KeelWebReceptionistKit<StoryReceptionist>(StoryReceptionist.class, router)
+                .loadPackage("io.github.sinri.yarn.weaver.receptionist.story");
     }
 }

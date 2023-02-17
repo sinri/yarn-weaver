@@ -29,4 +29,8 @@ public class YarnWeaver {
                     System.exit(1);
                 });
     }
+
+    public static String yarnRMAddress() {
+        return Keel.config("yarn.ResourceManager.address");
+    }
 }
