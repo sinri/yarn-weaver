@@ -104,7 +104,7 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
                 .postAbs(apiUrl())
                 .sendJsonObject(body)
                 .compose(bufferHttpResponse -> {
-                    if (bufferHttpResponse.statusCode() == expectedHttpStatusCode) {
+                    if (bufferHttpResponse.statusCode() != expectedHttpStatusCode) {
                         this.errorResponseText = bufferHttpResponse.bodyAsString();
                         return Future.failedFuture(new YarnSiteRemoteException(bufferHttpResponse.statusCode(), bufferHttpResponse.bodyAsJsonObject()));
                     }
