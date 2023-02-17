@@ -14,7 +14,7 @@ public class ListApplicationsTest extends P1Test {
         return new ClusterApplicationsRequest(YarnWeaver.yarnRMAddress())
                 .request()
                 .compose(applications -> {
-                    getLogger().info("applicateions", applications.toJsonObject());
+                    getLogger().info("applications", applications.toJsonObject());
                     return Future.succeededFuture();
                 });
     }

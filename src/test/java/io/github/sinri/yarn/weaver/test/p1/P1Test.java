@@ -5,9 +5,11 @@ import io.github.sinri.keel.helper.KeelHelpers;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.event.center.KeelOutputEventLogCenter;
+import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.YarnSiteRemoteException;
 import io.vertx.core.Future;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -55,7 +57,18 @@ abstract public class P1Test {
                     getLogger().info("test done");
                 })
                 .onFailure(throwable -> {
-                    getLogger().exception(throwable, "test failed");
+                    if (throwable instanceof YarnSiteRemoteException) {
+                        YarnSiteRemoteException e = (YarnSiteRemoteException) throwable;
+                        getLogger().exception(e, "YarnSiteRemoteException", new JsonObject()
+                                .put("code", e.getResponseCode())
+                                .put("message", e.getExceptionDetailedMessage())
+                                .put("class", e.getExceptionJavaClassName())
+                                .put("type", e.getExceptionType())
+                        );
+                    } else {
+                        getLogger().exception(throwable, "");
+                    }
+                    getLogger().fatal("test failed");
                 })
                 .eventually(v -> {
                     return Keel.getVertx().close();
