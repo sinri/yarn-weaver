@@ -1,6 +1,8 @@
 package io.github.sinri.yarn.weaver.test.p1;
 
+import io.github.sinri.keel.facade.Keel;
 import io.github.sinri.yarn.weaver.YarnWeaver;
+import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.filter.UserNameFilterAgent;
 import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.v1.ResourceManager.cluster.apps.ClusterNewApplicationRequest;
 import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.v1.ResourceManager.cluster.apps.ClusterSubmitApplicationRequest;
 import io.vertx.core.Future;
@@ -15,7 +17,9 @@ public class CreateApplicationTest extends P1Test {
 
     @Override
     protected Future<Void> run() {
+        String username = Keel.config("yarn.ResourceManager.UserNameFilter.UserName");
         return new ClusterNewApplicationRequest(YarnWeaver.yarnRMAddress())
+                .setFilterAgent(new UserNameFilterAgent(username))
                 .request()
                 .compose(meta -> {
                     getLogger().info("applied an application", Objects.requireNonNull(meta, "applied meta is null").toJsonObject());
@@ -37,6 +41,7 @@ public class CreateApplicationTest extends P1Test {
                                         .setKeepContainersAcrossApplicationAttempts(false)
                                 ;
                             })
+                            .setFilterAgent(new UserNameFilterAgent(username))
                             .request()
                             .compose(done -> {
                                 getLogger().info("submit done", meta.toJsonObject());

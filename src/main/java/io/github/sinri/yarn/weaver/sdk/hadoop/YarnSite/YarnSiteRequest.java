@@ -1,6 +1,7 @@
 package io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite;
 
 import io.github.sinri.keel.facade.Keel;
+import io.github.sinri.yarn.weaver.sdk.hadoop.YarnSite.filter.YarnSiteFilterAgent;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -16,6 +17,7 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
     private final String schema;
     private final String serviceAddress;
     private final String version;
+    private YarnSiteFilterAgent filterAgent = null;
     private String errorResponseText = null;
 
     /**
@@ -28,6 +30,11 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
         this.schema = "http";
         this.serviceAddress = serviceAddress;
         this.version = version;
+    }
+
+    public YarnSiteRequest<R> setFilterAgent(YarnSiteFilterAgent filterAgent) {
+        this.filterAgent = filterAgent;
+        return this;
     }
 
     /**
@@ -72,9 +79,13 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
     }
 
     protected Future<@Nullable JsonObject> requestWithPut(int expectedHttpStatusCode) {
-        return WebClient.create(Keel.getVertx())
-                .putAbs(apiUrl())
-                .send()
+        HttpRequest<Buffer> request = WebClient.create(Keel.getVertx())
+                .putAbs(apiUrl());
+        if (filterAgent != null) {
+            filterAgent.handle(request);
+            //request.putHeader("Hadoop-YARN-RM-Delegation-Token", delegationToken);
+        }
+        return request.send()
                 .compose(bufferHttpResponse -> {
                     if (bufferHttpResponse.statusCode() != expectedHttpStatusCode) {
                         this.errorResponseText = bufferHttpResponse.bodyAsString();
@@ -86,9 +97,13 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
     }
 
     protected Future<@Nullable JsonObject> requestWithPut(JsonObject body, int expectedHttpStatusCode) {
-        return WebClient.create(Keel.getVertx())
-                .putAbs(apiUrl())
-                .sendJsonObject(body)
+        HttpRequest<Buffer> request = WebClient.create(Keel.getVertx())
+                .putAbs(apiUrl());
+        if (filterAgent != null) {
+            filterAgent.handle(request);
+//            request.putHeader("Hadoop-YARN-RM-Delegation-Token", delegationToken);
+        }
+        return request.sendJsonObject(body)
                 .compose(bufferHttpResponse -> {
                     if (bufferHttpResponse.statusCode() != expectedHttpStatusCode) {
                         this.errorResponseText = bufferHttpResponse.bodyAsString();
@@ -100,9 +115,13 @@ public abstract class YarnSiteRequest<R extends YarnEntity> {
     }
 
     protected Future<@Nullable JsonObject> requestWithPost(@NotNull JsonObject body, int expectedHttpStatusCode) {
-        return WebClient.create(Keel.getVertx())
-                .postAbs(apiUrl())
-                .sendJsonObject(body)
+        HttpRequest<Buffer> request = WebClient.create(Keel.getVertx())
+                .postAbs(apiUrl());
+        if (filterAgent != null) {
+            filterAgent.handle(request);
+//            request.putHeader("Hadoop-YARN-RM-Delegation-Token", delegationToken);
+        }
+        return request.sendJsonObject(body)
                 .compose(bufferHttpResponse -> {
                     if (bufferHttpResponse.statusCode() != expectedHttpStatusCode) {
                         this.errorResponseText = bufferHttpResponse.bodyAsString();
